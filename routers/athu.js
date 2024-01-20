@@ -15,12 +15,17 @@ router.post('/api/auth', [
     let success = false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success, errors: errors.array() });
+      let errorMessages = errors.array().map((dta) => {
+        return dta.msg;
+      });
+      console.log(errorMessages);
+      const errorMessageString = errorMessages.join('');
+      return res.status(400).json({ success, msg: errorMessageString });
     }
     try {
       let usr = await User.findOne({ email: req.body.email })
       if (usr) {
-        return res.status(400).json({ success, errors: "email id already Exists use differnent id" });
+        return res.status(400).json({ success, msg: "email id already Exists use differnent id" });
       }
       const salt = await bcrypt.genSalt(10);
       const pass = await bcrypt.hash(req.body.password, salt);
@@ -38,7 +43,7 @@ router.post('/api/auth', [
       var token = await jwt.sign(data, tokenkey, {
         expiresIn: '2m'
       });
-      res.json({ success, token, id: user.id })
+      res.json({ success, token, id: user.id, msg: "success" })
       console.log(user)
 
     } catch (error) {
@@ -55,18 +60,23 @@ router.post('/api/login', [
     const errors = validationResult(req);
     let success = false
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      let errorMessages = errors.array().map((dta) => {
+        return dta.msg;
+      });
+      console.log(errorMessages);
+      const errorMessageString = errorMessages.join('');
+      return res.status(400).json({ success, msg: errorMessageString });
     }
     const { email, password } = req.body
-    // try {
+    try {
     let user = await User.findOne({ email })
     if (!user) {
-      return res.status(400).json({ success, errors: "enter with correct email and password" });
+      return res.status(400).json({ success, msg: "enter with correct email and password" });
 
     }
     const pascomapre = await bcrypt.compare(password, user.password);
     if (!pascomapre) {
-      return res.status(400).json({ success, errors: "enter with correct password email and password" });
+      return res.status(400).json({ success, msg: "enter with correct password email and password" });
     }
     const data = {
       user: {
@@ -77,13 +87,13 @@ router.post('/api/login', [
       expiresIn: '2m'
     });
     success = true
-    res.status(200).json({ success, token, id: user._id })
+    res.status(200).json({ success, token, id: user._id,msg:"successfully login" })
     console.log(user, token)
 
-    // } catch (error) {
-    //   res.status(400).json({success,errors: "enter with correct no email and password" });
+    } catch (error) {
+      res.status(400).json({success,msg: "enter with correct no email and password" });
 
-    // }
+    }
   })
 router.get('/api/getuser', fetchuser, async (req, res) => {
 
