@@ -23,7 +23,7 @@ router.post('/api/auth', [
       return res.status(400).json({ success, msg: errorMessageString });
     }
     try {
-      let usr = await User.findOne({ email: req.body.email })
+      let usr = await User.findOne({ email: req.body.email });
       if (usr) {
         return res.status(400).json({ success, msg: "email id already Exists use differnent id" });
       }
